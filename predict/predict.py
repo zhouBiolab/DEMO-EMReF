@@ -262,7 +262,10 @@ def main(params):
                 ).view(-1, 1, BOX_SIZE, BOX_SIZE, BOX_SIZE)
 
                 with torch.no_grad():
-                    y_pred = model(X, istrain=False)
+                    if isinstance(model, nn.DataParallel) and X.shape[0] < n_gpus:
+                         y_pred = model.module(X, istrain=False)
+                    else:
+                         y_pred = model(X, istrain=False)
 
                 y_pred = y_pred.view(-1, BOX_SIZE, BOX_SIZE, BOX_SIZE)
                 y_pred = y_pred.cpu().numpy()
